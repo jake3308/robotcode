@@ -1,0 +1,69 @@
+package a2023072706;
+import robocode.*;
+import java.awt.Color;
+import java.util.ArrayList;
+
+public class Power extends Robot {
+   private ArrayList<String> scannedRobots = new ArrayList<>();
+
+   public void run() {
+      setColors(Color.red, Color.blue, Color.green);
+
+      while (true) {
+         if (scannedRobots.size() > 1) {
+            escapeFromRobots();
+         } else {
+            ahead(100);
+            sweepGun();
+            back(100);
+            sweepGun();
+         }
+      }
+   }
+
+   public void sweepGun() {
+      for (int i = 0; i < 5; i++) {
+         turnGunRight(20);
+         turnGunLeft(20);
+      }
+   }
+
+   public void onScannedRobot(ScannedRobotEvent e) {
+      if (!scannedRobots.contains(e.getName())) {
+         scannedRobots.add(e.getName());
+      }
+      
+      if (scannedRobots.size() == 1) {
+         double firePower = Math.min(400 / e.getDistance(), 3);
+         turnGunRight(getHeading() - getGunHeading() + e.getBearing());
+         fire(firePower);
+      }
+   }
+
+   public void onRobotDeath(RobotDeathEvent e) {
+      scannedRobots.remove(e.getName());
+   }
+
+   public void escapeFromRobots() {
+      turnRight(90);
+      ahead(200);
+      turnRight(45);
+   }
+
+   public void onHitByBullet(HitByBulletEvent e) {
+      double bearing = e.getBearing();
+
+      turnRight(-bearing);
+      back(100);
+
+      for (int i = 0; i < 5; i++) {
+         ahead(70);
+         turnRight(45);
+      }
+   }
+
+   public void onHitWall(HitWallEvent e) {
+      back(50);
+      turnRight(90);
+   }
+}
